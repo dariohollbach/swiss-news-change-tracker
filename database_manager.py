@@ -2,6 +2,7 @@ import sqlite3
 from typing import Optional
 
 import article
+from news_paper import NewsPaper
  
 def create_database():
     db_connection = sqlite3.connect("swiss_news_articles.db")
@@ -112,7 +113,37 @@ def get_article_by_title(title: str) -> Optional[article.Article]:
 
     if result:
         return article.Article(
-            title=result[2],
-            content=result[3],
+            id=result[0],
+            title=result[1],
+            content=result[2],
         )
     return None
+
+def get_all_articles_of_news_paper(news_paper_id: int) -> list[article.Article]:
+    db_connection = sqlite3.connect("swiss_news_articles.db")
+    cursor = db_connection.cursor()
+    
+    cursor.execute("SELECT * FROM articles WHERE news_paper_id = ?", (news_paper_id,))
+    results = cursor.fetchall()
+    
+    db_connection.close()
+
+    articles = []
+    for row in results:
+        articles.append(article.Article(
+            id=row[0],
+            title=row[2],
+            content=row[3],
+        ))
+    return articles
+
+def get_all_news_papers() -> list[NewsPaper]:
+    db_connection = sqlite3.connect("swiss_news_articles.db")
+    cursor = db_connection.cursor()
+    
+    cursor.execute("SELECT name, id FROM NEWS_PAPERS")
+    results = cursor.fetchall()
+    
+    db_connection.close()
+
+    return [NewsPaper(title=row[0], id=row[1]) for row in results]
