@@ -1,7 +1,9 @@
 <template>
   <div>
     <h2>{{ id }} | {{ name }}</h2>
-    <Article v-for="item in articles" :key="item.id" :name="item.title" :id="item.id" />
+    <ul>
+      <Article v-for="item in articles" :key="item.id" :name="item.title" :id="item.id" :content="item.content" />
+    </ul>
   </div>
 </template>
 
@@ -45,5 +47,9 @@ export default {
 p {
   font-size: 16px;
   margin: 4px 0;
+}
+
+ul {
+  padding: 0;
 }
 </style>

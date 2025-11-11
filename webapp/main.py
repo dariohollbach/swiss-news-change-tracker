@@ -30,5 +30,10 @@ def get_articles_by_news_paper(news_paper_id: int):
     articles = database_manager.get_all_articles_of_news_paper(news_paper_id)
     return jsonify([art.to_dict() for art in articles])
 
+@app.route('/api/data/articles/<int:article_id>/changes')
+def get_article_changes(article_id: int):
+    changes = database_manager.get_article_changes(article_id)
+    return jsonify(changes)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=1000, debug=True)

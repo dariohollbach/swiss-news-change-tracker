@@ -1,12 +1,30 @@
 <template>
-  <div>
-    <p><strong>{{ id }}</strong> | {{ name }}</p>
-  </div>
+  <li>
+    <div @click="toggleDetails" class="item-header">
+      <p>
+        <strong>{{ id }}</strong> | {{ name }} | Changes: {{ changes.length }}
+      </p>
+
+      <span class="arrow">{{ isExpanded ? '&#9660;' : '&#9658;' }}</span>
+    </div>
+
+    <div v-if="isExpanded" class="details-content">
+      <slot name="details"></slot>
+      <p v-if="content">{{ content }}</p>
+
+          <DiffViewer :rawDiff="change.change" v-for="(change, index) in changes" :key="index"/>
+    </div>
+  </li>
 </template>
 
 <script>
+import DiffViewer from './diff_viewer.vue';
+
 export default {
   name: 'Article',
+  components: {
+    DiffViewer
+  },
   props: {
     name: {
       type: String,
@@ -15,14 +33,62 @@ export default {
     id: {
       type: [String, Number],
       required: true
+    },
+    content: {
+      type: String,
+      default: ''
+    }
+  },
+  data() {
+    return {
+      isExpanded: false,
+      changes: []
+    };
+  },
+  mounted() {
+    fetch(`http://localhost:1000/api/data/articles/${this.id}/changes`)
+      .then(response => response.json())
+      .then(data => {
+        this.changes = data;
+      })
+      .catch(error => {
+        console.error('Error fetching article changes:', error);
+      });
+  },
+  methods: {
+    toggleDetails() {
+      this.isExpanded = !this.isExpanded;
     }
   }
 }
 </script>
 
 <style scoped>
-p {
-  font-size: 16px;
-  margin: 4px 0;
+li {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: -1px;
+  background-color: #f9f9f9;
+}
+
+.details-content {
+  padding: 10px 8px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+}
+
+.arrow {
+  font-size: 1.2em;
+  margin-left: 10px;
 }
 </style>

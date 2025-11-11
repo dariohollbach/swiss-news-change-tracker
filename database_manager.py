@@ -114,8 +114,25 @@ def get_article_by_title(title: str) -> Optional[article.Article]:
     if result:
         return article.Article(
             id=result[0],
-            title=result[1],
-            content=result[2],
+            title=result[2],
+            content=result[3],
+        )
+    return None
+
+def get_article_by_id(article_id: int) -> Optional[article.Article]:
+    db_connection = sqlite3.connect("swiss_news_articles.db")
+    cursor = db_connection.cursor()
+    
+    cursor.execute("SELECT * FROM articles WHERE id = ?", (article_id,))
+    result = cursor.fetchone()
+    
+    db_connection.close()
+
+    if result:
+        return article.Article(
+            id=result[0],
+            title=result[2],
+            content=result[3],
         )
     return None
 
@@ -147,3 +164,20 @@ def get_all_news_papers() -> list[NewsPaper]:
     db_connection.close()
 
     return [NewsPaper(title=row[0], id=row[1]) for row in results]
+
+def get_article_changes(article_id: int) -> list[dict]:
+    db_connection = sqlite3.connect("swiss_news_articles.db")
+    cursor = db_connection.cursor()
+    
+    cursor.execute("SELECT change, change_timestamp FROM article_changes WHERE article_id = ?", (article_id,))
+    results = cursor.fetchall()
+    
+    db_connection.close()
+
+    changes = []
+    for row in results:
+        changes.append({
+            "change": row[0],
+            "change_timestamp": row[1]
+        })
+    return changes
