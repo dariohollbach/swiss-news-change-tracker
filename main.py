@@ -9,30 +9,41 @@ def main():
     for fetcher in content_fetchers:
         articles = fetcher.scrap_all_articles()
         for art in articles:
-            news_paper_id = database_manager.get_news_paper_id('20 Minuten')
+            art.content = art.content.replace(". ", ". \\n")
+            art.content = art.content.replace("? ", "? \\n")
+            art.content = art.content.replace("! ", "! \\n")
+            
+            news_paper_id = database_manager.get_news_paper_id(fetcher.source_name())
             if not news_paper_id:
-                news_paper_id = database_manager.add_news_paper('20 Minuten')
+                news_paper_id = database_manager.add_news_paper(fetcher.source_name())
                 
             if not art.content:
-                print("Article with empty content found, skipping...")
+                print(f"{fetcher.source_name()}: Article with empty content found, skipping...")
                 continue
             
             if not art.title:
-                print("Article with empty title found, skipping...")
+                print(f"{fetcher.source_name()}: Article with empty title found, skipping...")
                 continue
 
             if db_art := database_manager.get_article_by_title(art.title):
                 if db_art.content != art.content:
-                    if "live" in art.content:
+                    if "live" in art.content.lower():
                         continue  # Skip live update articles
-                    print(f"Article titled '{art.title}' with different content found, updating...")
+                    
+                    print(f"{fetcher.source_name()}: Article titled '{art.title}' published at {art.publication_date} with different content found, updating...")
                     diff = difflib.unified_diff(
-                        db_art.content.splitlines(),
-                        art.content.splitlines(),
+                        db_art.content.split("\\n"),
+                        art.content.split("\\n"),
                         fromfile='Database Content',
                         tofile='Fetched Content',
-                        lineterm=''
+                        lineterm='\\n'
                     )
+                    already_existing_diffs = database_manager.get_article_changes(article_id=db_art.id)
+                    for change in already_existing_diffs:
+                        if change["change"] == '\n'.join(list(diff)):
+                            continue
+                        break
+                
                     database_manager.add_article_change(
                         db_art.id,
                         '\n'.join(list(diff)),
@@ -41,12 +52,13 @@ def main():
                     print('\n'.join(list(diff)))
                 continue
 
-            print(f"Adding article titled '{art.title}' to the database.")
+            print(f"{fetcher.source_name()}: Adding article titled '{art.title}' published at {art.publication_date} to the database.")
 
             database_manager.add_article(
                 news_paper_id,
                 art.title,
-                art.content
+                art.content,
+                art.publication_date
             )
         
 if __name__ == "__main__":

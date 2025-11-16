@@ -24,6 +24,7 @@ def create_database():
         news_paper_id INTEGER NOT NULL,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
+        publication_date TEXT NOT NULL,
         FOREIGN KEY(news_paper_id) REFERENCES NEWS_PAPERS(id) ON DELETE CASCADE
     )""")
 
@@ -70,14 +71,14 @@ def get_news_paper_id(name: str) -> Optional[int]:
         return result[0]
     return None
 
-def add_article(news_paper_id: int, title: str, content: str) -> int:
+def add_article(news_paper_id: int, title: str, content: str, publication_date: str) -> int:
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
     
     cursor.execute("""
-    INSERT OR IGNORE INTO articles (news_paper_id, title, content)
-    VALUES (?, ?, ?)
-    """, (news_paper_id, title, content))
+    INSERT OR IGNORE INTO articles (news_paper_id, title, content, publication_date)
+    VALUES (?, ?, ?, ?)
+    """, (news_paper_id, title, content, publication_date))
 
     article_id = cursor.lastrowid
     
@@ -116,6 +117,7 @@ def get_article_by_title(title: str) -> Optional[article.Article]:
             id=result[0],
             title=result[2],
             content=result[3],
+            publication_date=result[4]
         )
     return None
 
@@ -133,6 +135,7 @@ def get_article_by_id(article_id: int) -> Optional[article.Article]:
             id=result[0],
             title=result[2],
             content=result[3],
+            publication_date=result[4]
         )
     return None
 
@@ -151,6 +154,7 @@ def get_all_articles_of_news_paper(news_paper_id: int) -> list[article.Article]:
             id=row[0],
             title=row[2],
             content=row[3],
+            publication_date=row[4]
         ))
     return articles
 

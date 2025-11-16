@@ -1,7 +1,8 @@
 class Article:
-    def __init__(self, title, content, id=None):
+    def __init__(self, title, content, publication_date, id=None):
         self.title = title
         self.content = content
+        self.publication_date = publication_date
         self.id = id
 
     def summary(self):
@@ -15,5 +16,6 @@ class Article:
         return {
             'id': self.id,
             'title': self.title,
-            'content': self.content
+            'content': self.content,
+            'publication_date': self.publication_date
         }

@@ -2,7 +2,14 @@
   <div>
     <h2>{{ id }} | {{ name }}</h2>
     <ul>
-      <Article v-for="item in articles" :key="item.id" :name="item.title" :id="item.id" :content="item.content" />
+      <button @click="only_show_differences = !only_show_differences" :class="{ 'on-state': only_show_differences }">
+        <span v-if="only_show_differences">Show All</span>
+        <span v-else>Only Show Differences</span>
+      </button>
+      <template v-for="article in articles" :key="article.id">
+        <Article v-if="article.changes.length > 0 || !only_show_differences" :name="article.title" :id="article.id"
+          :content="article.content" :changes="article.changes" :publication_date="article.publication_date" />
+      </template>
     </ul>
   </div>
 </template>
@@ -27,7 +34,8 @@ export default {
   },
   data() {
     return {
-      articles: []
+      articles: [],
+      only_show_differences: false
     }
   },
   mounted() {
@@ -35,6 +43,16 @@ export default {
       .then(response => response.json())
       .then(data => {
         this.articles = data
+        for (const article of this.articles) {
+          fetch(`http://localhost:1000/api/data/articles/${article.id}/changes`)
+            .then(response => response.json())
+            .then(data => {
+              article.changes = data;
+            })
+            .catch(error => {
+              console.error('Error fetching article changes:', error);
+            });
+        }
       })
       .catch(error => {
         console.error('Error fetching articles:', error)

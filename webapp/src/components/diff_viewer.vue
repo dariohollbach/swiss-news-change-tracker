@@ -94,13 +94,14 @@ export default {
 <style scoped>
 /* Main container for the diff */
 .diff-viewer {
-  font-family: monospace; /* Monospace font is essential for alignment */
+  font-family: monospace;
   font-size: 14px;
   line-height: 1.4;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 4px;
-  overflow: auto;
+  overflow:auto;
+  width: 100%;
 }
 
 /* Header for file names */
@@ -116,17 +117,21 @@ export default {
 /* Individual line styling */
 .diff-line {
   display: flex;
-  white-space: pre-wrap; /* Allows the code to wrap if necessary */
+  white-space: pre-wrap;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0;
 }
 
 /* Line Number Columns */
 .line-num {
-  width: 40px; /* Fixed width for alignment */
+  width: 40px;
   padding: 0 10px;
   text-align: right;
   color: #777;
   background-color: #f7f7f7;
   border-right: 1px solid #eee;
+  box-sizing: border-box;
 }
 
 /* Content Column */
@@ -134,24 +139,25 @@ export default {
   flex-grow: 1;
   padding: 0 10px;
   margin: 0;
-  /* Use pre tag to preserve whitespace and line breaks from original text */
+  white-space: pre; /* preserve whitespace */
+  display: block;
 }
 
-/* Specific styling for line types */
-.removed { background-color: #ffeef0; } /* Light red/pink */
-.removed .line-num { color: firebrick; }
-.removed .line-content { color: firebrick; }
+/* Specific styling for line types - target the same element that has both classes */
+.diff-line.removed { background-color: #ffeef0; } /* Light red/pink */
+.diff-line.removed .line-num { color: firebrick; background-color: #ffeef0; }
+.diff-line.removed .line-content { color: firebrick; }
 
-.added { background-color: #e6ffed; } /* Light green */
-.added .line-num { color: green; }
-.added .line-content { color: green; }
+.diff-line.added { background-color: #e6ffed; } /* Light green */
+.diff-line.added .line-num { color: green; background-color: #e6ffed; }
+.diff-line.added .line-content { color: green; }
 
-.context { background-color: #fff; }
-.hunk-header { 
+.diff-line.context { background-color: #fff; }
+.diff-line.hunk-header { 
   background-color: #f7f7f7; 
   color: #777;
   font-style: italic;
   font-weight: bold;
 }
-.hunk-header .line-num { background-color: #e0e0e0; }
+.diff-line.hunk-header .line-num { background-color: #e0e0e0; color: #777; }
 </style>

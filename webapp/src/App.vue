@@ -3,7 +3,12 @@
 <template>
   <div>
     <h1>News Pages</h1>
-    <NewsPage v-for="item in items" :key="item.id" :name="item.title" :id="item.id" />
+    <select v-model="current_news_paper_id">
+      <option v-for="item in news_papers" :key="item.id" :value="item.id">
+        {{ item.title }}
+      </option>
+    </select>
+    <NewsPage v-if="news_papers.find(np => np.id === current_news_paper_id)" :key="news_papers.find(np => np.id === current_news_paper_id).id" :name="news_papers.find(np => np.id === current_news_paper_id).title" :id="news_papers.find(np => np.id === current_news_paper_id).id" />
   </div>
 </template>
 
@@ -17,7 +22,8 @@ export default {
   },
   data() {
     return {
-      items: []
+      news_papers: [],
+      current_news_paper_id: null
     }
   },
   mounted() {
@@ -25,17 +31,23 @@ export default {
     fetch('http://localhost:1000/api/data/news_papers')
       .then(response => response.json())
       .then(data => {
-        this.items = data
+        this.news_papers = data
       })
       .catch(error => {
-        console.error('Error fetching items:', error)
+        console.error('Error fetching news_papers:', error)
       })
   }
 }
+
+
 </script>
 
 <style>
 h1 {
   font-family: Arial, sans-serif;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
 }
 </style>

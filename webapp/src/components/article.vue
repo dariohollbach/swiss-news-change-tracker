@@ -2,7 +2,7 @@
   <li>
     <div @click="toggleDetails" class="item-header">
       <p>
-        <strong>{{ id }}</strong> | {{ name }} | Changes: {{ changes.length }}
+        <strong>{{ id }}</strong> | {{ publication_date }} | {{ name }} | Changes: {{ changes.length }}
       </p>
 
       <span class="arrow">{{ isExpanded ? '&#9660;' : '&#9658;' }}</span>
@@ -10,9 +10,8 @@
 
     <div v-if="isExpanded" class="details-content">
       <slot name="details"></slot>
-      <p v-if="content">{{ content }}</p>
-
-          <DiffViewer :rawDiff="change.change" v-for="(change, index) in changes" :key="index"/>
+      <p v-if="content" v-html="formattedContent"></p>
+      <DiffViewer :rawDiff="change.change" v-for="(change, index) in changes" :key="index" />
     </div>
   </li>
 </template>
@@ -36,24 +35,26 @@ export default {
     },
     content: {
       type: String,
-      default: ''
+      required: true
+    },
+    publication_date: {
+      type: String,
+      required: true
+    },
+    changes: {
+      type: Array,
+      default: () => []
+    }
+  },
+  computed: {
+    formattedContent() {
+      return this.content ? this.content.replace(/\\n/g, '<br>') : '';
     }
   },
   data() {
     return {
       isExpanded: false,
-      changes: []
     };
-  },
-  mounted() {
-    fetch(`http://localhost:1000/api/data/articles/${this.id}/changes`)
-      .then(response => response.json())
-      .then(data => {
-        this.changes = data;
-      })
-      .catch(error => {
-        console.error('Error fetching article changes:', error);
-      });
   },
   methods: {
     toggleDetails() {
