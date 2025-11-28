@@ -38,30 +38,61 @@ Gemäss dem Medienbarometer der Schweiz haben die online Medien in der Schweiz i
 Im Vergleich zu den Printmedien gibt es für Online-Medien die möglichkeit, Artikel auch nach der Veröffentlichung noch zu ändern.
 Wie häufig diese Möglichkeit von unterschiedlichen Schweizer Online-Zeitschriften genutzt wird, wird in dieser Arbeit untersucht.
 
+\subsection{Einschrenkung}
+Die zu untersuchenden Medien wurden aus verschiedenen Qualitätsgattungen gemäss dem Medienqualitätsrating des Vereins Medienqualitaet Schweiz ausgewählt \%\cite{MedienqualitaetsratingMQR24Verein}.
+Folgende Medien wurden ausgewählt: 20 Minuten, Watson und srf.ch.
+Um dies herauszufinden wurden alle Artikel von den Medien in einem regelmässigen Zeitabstand herruntergeladen und in eine Datenbank gespeichert.
+Ist in der Datenbank ein Artikel bereits gespeichert, wird der der die Änderung seperat in der Datenbank gespeichert.
+Somit kann analysiert werden welche Artikel, von welchen Medien wie oft geändert wurden.
 
 \section{Methodik}
+
+Für die Beantwortung der Fragestellung wurden mehrere Python Applikationen entwickelt.
+Diese sind alle in einem Github-Repository\footnote{https://github.com/dariohollbach/swiss-news-change-tracker} gespeichert. 
+
+\subsection{Web Crawling}
+
+Das regelmässige Herunterladen von Daten aus dem Internet wird Web-Crawling genannt.
+Für das Web-Crawling wurde eine Python Applikation entwicklet.
+Die ausgewählten Medien verfügen alle über einen RSS-Feed.
+Um diesen auszulesen wurde das Python Modul \texttt{feedparser} verwendet.
+Von dem RSS Feed können die Links zu den Artikeln herausgefunden werden.
+Mit dem Python \texttt{request} Modul wurde der Inhalt der Artikel heruntergeladen.
+Da die Artikel aus dem Web stammen ist das Format HTML. 
+Für die Datenbank ist nur der Text eines Artikel von Relevanz.
+Dieser Text-Inhalt wurde mithilfe vom Python Modul \texttt{BeautifulSoup} extrahiert.
+
+Um die Applikation alle fünf Minuten auszuführen, wurde ein Cron-Job erstellt. 
+Beim erstellen des Cron Jobs sind Probleme aufgetreten, welche schwierig nachzuvollziehen waren. 
+Deshalb wurde die Ausgabe der Python Applikation in ein Log-File \texttt{swiss\_news\_change\_tracker\_log} gespeichert.
+
+\subsection{Visualisierung der Änderungen}
+
+Da die reinen Daten der Artikeländerungen mittels SQL-Abfragen nur schwer zu interpretieren sind, wurde eine Web-Applikation zur Visualisierung entwickelt.
+Das Frontend wurde mit dem JavaScript-Framework \texttt{Vue.js} umgesetzt.
+Für den Datenzugriff wurde eine REST-API in Python entwickelt, welche dem Frontend die in der Datenbank gespeicherten Artikel und deren Änderungen zur Verfügung stellt.
+Diese API greift auf dieselbe Datenbankinfrastruktur zu wie der Web-Crawler.
+Die Web-Applikation stellt die Artikel der verschiedenen Medien übersichtlich dar. 
+Vorhandene Änderungen eines Artikels können durch eine interaktive Ausklapp-Funktion angezeigt werden, was eine direkte Analyse der Modifikationen ermöglicht.
+
+\subsection{Klassifikation der Änderungen}
+Eine erste Analyse der erfassten Daten zeigte, dass viele Änderungen lediglich Korrekturen von Rechtschreib- oder Tippfehlern umfassen. Um zwischen solch geringfügigen Anpassungen und substanziellen inhaltlichen Modifikationen zu differenzieren, wurde eine Klassifizierung der Änderungen vorgenommen.
+Aufgrund der überschaubaren Anzahl an Änderungen wurde dieser Prozess manuell durchgeführt.
+Zu diesem Zweck wurde die Web-Anwendung um eine Funktionalität erweitert, die es ermöglicht, jede Änderung mittels eines Schiebereglers als geringfügig oder inhaltlich zu klassifizieren.
+
+\subsection{Analyse der Daten}
+Für die statistische Auswertung der klassifizierten Daten wurde ein Python-Skript unter Verwendung der Bibliothek \texttt{Pandas} entwickelt. 
+Dieses ermöglichte es, die Daten zu aggregieren und zu analysieren, um die Forschungsfrage zu beantworten. 
+Zur Veranschaulichung der Resultate wurden mit \texttt{matplotlib} diverse Grafiken erstellt, welche die Verteilung und Art der Änderungen visualisieren.
+
+\begin{verbatim}
+*/2 * * * * cd /home/dario/swiss-news-change-tracker/ && python3 /home/dario/swiss-news-change-tracker/main.py > swiss_news_change_tracker_log
+\end{verbatim}
 
 
 \section{Resultate}
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
 
-\begin{table}[ht]
-\centering
-\begin{tabular}{l l}
-Lorem & ipsum \\\hline
-dolor sit amet & 66 \\
-consetetur sadipscing elitr & 99 \\
-\end{tabular}
-\caption{Lorem ipsum}
-\label{tab:lorem}
-\end{table}
-
-%\begin{figure}
-%  \includegraphics[width=\linewidth]{ipsum.jpg}
-%  \caption{Lorem ipsum}
-%  \label{fig:ipsum}
-%\end{figure}
-%Lorem ipsum dolor sit amet figure \ref{fig:ipsum}.
 
 \section{Diskussion}
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
@@ -69,6 +100,9 @@ Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod 
 %-------------------------
 % literature
 %-------------------------
+\onecolumn
+\newpage
+
 \bibliography{library}
 
 \end{document}
