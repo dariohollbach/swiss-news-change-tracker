@@ -1,6 +1,6 @@
 from datetime import datetime
 import difflib
-from email.utils import parsedate_to_datetime
+from dateutil.parser import parse as parse_date
 
 import database_manager
 from content_fetcher_manager import content_fetchers
@@ -11,11 +11,10 @@ def main():
         articles = fetcher.scrap_all_articles()
         for art in articles:
             try:
-                # Parse the date and format it to 'YYYY-MM-DD HH:MM:SS'
-                parsed_date = parsedate_to_datetime(art.publication_date)
-                art.publication_date = parsed_date.strftime(
-                    '%Y-%m-%d %H:%M:%S')
-            except (TypeError, ValueError):
+                # Parse the date and format it to 'YYYY-MM-DD HH:MM:SS' for consistency
+                parsed_date = parse_date(art.publication_date)
+                art.publication_date = parsed_date.strftime('%Y-%m-%d %H:%M:%S')
+            except (ValueError, TypeError):
                 print(
                     f"Could not parse date: {art.publication_date}, skipping article.")
                 continue
@@ -53,15 +52,19 @@ def main():
                         lineterm='\\n'
                     )
 
-                    if diff == "":
+                    if '\n'.join(list(diff)) == "":
                         continue  # No changes detected
 
                     # Check for existing identical diffs to avoid duplicates
+                    duplicated_diff = False
                     already_existing_diffs = database_manager.get_article_changes(
                         article_id=db_art.id)
                     for change in already_existing_diffs:
                         if change["change"] == '\n'.join(list(diff)):
-                            continue
+                            duplicated_diff = True
+                            break
+                    if duplicated_diff:
+                        continue
 
                     print(
                         f"{fetcher.source_name()}: Article titled '{art.title}' published at {art.publication_date} with different content found, updating...")
