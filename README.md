@@ -5,19 +5,11 @@ Application to crawl articles from swiss online news platforms.
 ## Setup
 
 The project requires Python 3.8+ and Node.js 14+.
-It was developed to run on raspberry pi OS but should work on any Unix-like system.
-It is recommended to run the crawler application inside the raspberry pi and then download the database file to your local machine to run the web application.
-
-To download the database file from the raspberry pi to your local machine, you can use `scp`:
-
-```bash
-scp pi@<raspberry_pi_ip>:/path/to/news_articles.db /local/path/to/news_articles.db
-```
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/swiss-news-change-tracker.git
+git clone https://github.com/dariohollbach/swiss-news-change-tracker.git
 cd swiss-news-change-tracker
 ```
 2. Create a virtual environment and activate it:
@@ -30,6 +22,15 @@ source venv/bin/activate
 
 ```bash
 pip install -r requirements.txt
+```
+
+It was developed to run on raspberry pi OS but should work on any Unix-like system.
+It is recommended to run the crawler application inside the raspberry pi and then download the database file to your local machine to run the web application.
+
+To download the database file from the raspberry pi to your local machine, you can use `scp`:
+
+```bash
+scp pi@<raspberry_pi_ip>:/path/to/news_articles.db /local/path/to/news_articles.db
 ```
 
 ## Database
