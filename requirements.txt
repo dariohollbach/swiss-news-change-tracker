@@ -1,0 +1,7 @@
+Flask
+Flask-Cors
+python-dateutil
+requests
+beautifulsoup4
+urllib3<2
+feedparser

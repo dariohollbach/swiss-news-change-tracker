@@ -42,7 +42,7 @@ To initialize the database, run the following command:
 python3 src/database_manager.py
 ```
 
-The database file `news_articles.db` will be created in the directory from where you call the application.
+The database file `swiss_news_articles.db` will be created in the directory from where you call the application.
 
 ## Web Crawler
 The web crawler is implemented in `main.py`. It scrapes articles from predefined news websites and stores them in the database.
@@ -61,16 +61,20 @@ To automate the web crawling process, you can set up a cron job that runs every 
 
 ## Web Application
 The web application is built using Flask for the backend and Vue.js for the frontend.
+
+> [!IMPORTANT] 
+> The application needs to be run from the same directory where the database file `swiss_news_articles.db` is located.
+
 To start the Flask server, navigate to the `webapp` directory and run:
 
 ```bash
-python3 main.py
+python3 webapp/main.py
 ```
 The frontend can be served using a development server. Navigate to the `webapp` directory and run:
 
 ```bash
 npm install
-npm run serve
+npm run dev
 ```
 
 ![alt text](images/frontend.png "Screenshot of the web application")
