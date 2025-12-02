@@ -5,20 +5,14 @@ from flask_cors import CORS
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
+sys.path.append(os.path.join(parent_dir, "src"))
 
 import database_manager
-import article
 
 app = Flask(__name__)
 CORS(app)  # This will allow all origins
 
 # --- API Endpoints ---
-
-@app.route('/', methods=['GET'])
-def home():
-    """Returns a simple greeting message."""
-    return "<h1>Local Python API Server Running</h1><p>Navigate to /api/data to see JSON output.</p>"
 
 @app.route('/api/data/news_papers')
 def get_news_papers():
@@ -27,13 +21,29 @@ def get_news_papers():
 
 @app.route('/api/data/news_papers/<int:news_paper_id>/articles')
 def get_articles_by_news_paper(news_paper_id: int):
-    articles = database_manager.get_all_articles_of_news_paper(news_paper_id)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    articles = database_manager.get_all_articles_of_news_paper(news_paper_id, limit=1000, start_date=start_date, end_date=end_date)
     return jsonify([art.to_dict() for art in articles])
 
 @app.route('/api/data/articles/<int:article_id>/changes')
 def get_article_changes(article_id: int):
     changes = database_manager.get_article_changes(article_id)
     return jsonify(changes)
+
+@app.route('/api/data/articles/<int:article_id>', methods=['DELETE'])
+def delete_article(article_id: int):
+    database_manager.delete_article(article_id)
+    return jsonify({"success": True, "message": f"Article {article_id} deleted successfully."})
+
+@app.route('/api/data/changes/<int:change_id>/classify', methods=['PUT'])
+def classify_change(change_id: int):
+    data = request.get_json()
+    classification = data.get('classification')
+    if not classification or classification not in ['not classified', 'typo', 'content change']:
+        return jsonify({"error": "Invalid classification"}), 400
+    database_manager.update_change_classification(change_id, classification)
+    return jsonify({"success": True, "message": f"Change {change_id} classified as {classification}"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=1000, debug=True)

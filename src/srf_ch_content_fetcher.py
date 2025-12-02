@@ -22,7 +22,7 @@ class srf_ch_content_fetcher(content_fetcher):
         return articles
     
     def source_name(self) -> str:
-        return "srf.ch/news"
+        return "SRF News"
 
     def get_text_content(self, url: str) -> str:
         response = requests.get(url)

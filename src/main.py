@@ -1,5 +1,6 @@
 from datetime import datetime
 import difflib
+from email.utils import parsedate_to_datetime
 
 import database_manager
 from content_fetcher_manager import content_fetchers
@@ -9,28 +10,41 @@ def main():
     for fetcher in content_fetchers:
         articles = fetcher.scrap_all_articles()
         for art in articles:
+            try:
+                # Parse the date and format it to 'YYYY-MM-DD HH:MM:SS'
+                parsed_date = parsedate_to_datetime(art.publication_date)
+                art.publication_date = parsed_date.strftime(
+                    '%Y-%m-%d %H:%M:%S')
+            except (TypeError, ValueError):
+                print(
+                    f"Could not parse date: {art.publication_date}, skipping article.")
+                continue
+
             art.content = art.content.replace(". ", ". \\n")
             art.content = art.content.replace("? ", "? \\n")
             art.content = art.content.replace("! ", "! \\n")
-            
-            news_paper_id = database_manager.get_news_paper_id(fetcher.source_name())
+
+            news_paper_id = database_manager.get_news_paper_id(
+                fetcher.source_name())
             if not news_paper_id:
-                news_paper_id = database_manager.add_news_paper(fetcher.source_name())
-                
+                news_paper_id = database_manager.add_news_paper(
+                    fetcher.source_name())
+
             if not art.content:
-                print(f"{fetcher.source_name()}: Article with empty content found, skipping...")
+                print(
+                    f"{fetcher.source_name()}: Article with empty content found, skipping...")
                 continue
-            
+
             if not art.title:
-                print(f"{fetcher.source_name()}: Article with empty title found, skipping...")
+                print(
+                    f"{fetcher.source_name()}: Article with empty title found, skipping...")
                 continue
 
             if db_art := database_manager.get_article_by_title(art.title):
                 if db_art.content != art.content:
-                    if "live" in art.content.lower():
+                    if "live" in art.content.lower() or "ticker" in art.content.lower():
                         continue  # Skip live update articles
-                    
-                    print(f"{fetcher.source_name()}: Article titled '{art.title}' published at {art.publication_date} with different content found, updating...")
+
                     diff = difflib.unified_diff(
                         db_art.content.split("\\n"),
                         art.content.split("\\n"),
@@ -38,18 +52,24 @@ def main():
                         tofile='Fetched Content',
                         lineterm='\\n'
                     )
-                    already_existing_diffs = database_manager.get_article_changes(article_id=db_art.id)
+
+                    if diff == "":
+                        continue  # No changes detected
+
+                    # Check for existing identical diffs to avoid duplicates
+                    already_existing_diffs = database_manager.get_article_changes(
+                        article_id=db_art.id)
                     for change in already_existing_diffs:
                         if change["change"] == '\n'.join(list(diff)):
                             continue
-                        break
-                
+
+                    print(
+                        f"{fetcher.source_name()}: Article titled '{art.title}' published at {art.publication_date} with different content found, updating...")
                     database_manager.add_article_change(
                         db_art.id,
                         '\n'.join(list(diff)),
                         datetime.now()
-                        )
-                    print('\n'.join(list(diff)))
+                    )
                 continue
 
             print(f"{fetcher.source_name()}: Adding article titled '{art.title}' published at {art.publication_date} to the database.")
@@ -60,6 +80,7 @@ def main():
                 art.content,
                 art.publication_date
             )
-        
+
+
 if __name__ == "__main__":
     main()
