@@ -33,14 +33,14 @@
 
 \section{Einleitung}
 
-Die Präsenz von Online-Medien wird ständig grösser. 
-Gemäss dem Medienbarometer der Schweiz haben die online Medien in der Schweiz im Jahr 2023 eine Meinungsmacht von 27\%\cite{bakomMediengattungen}.
-Im Vergleich zu den Printmedien gibt es für Online-Medien die möglichkeit, Artikel auch nach der Veröffentlichung noch zu ändern.
-Wie häufig diese Möglichkeit von unterschiedlichen Schweizer Online-Zeitschriften genutzt wird, wird in dieser Arbeit untersucht.
+Die Präsenz von online Medien wird ständig grösser. 
+Gemäss dem Medienbarometer der Schweiz haben die online Medien in der Schweiz im Jahr 2023 eine Meinungsmacht von 27\% \cite{bakomMediengattungen}.
+Im Vergleich zu den Printmedien gibt es für online Medien die möglichkeit, Artikel auch nach der Veröffentlichung noch zu ändern.
+Wie häufig diese Möglichkeit von unterschiedlichen Schweizer online Zeitschriften genutzt wird, wird in dieser Arbeit untersucht.
 
-\subsection{Einschrenkung}
-Die zu untersuchenden Medien wurden aus verschiedenen Qualitätsgattungen gemäss dem Medienqualitätsrating des Vereins Medienqualitaet Schweiz ausgewählt \%\cite{MedienqualitaetsratingMQR24Verein}.
-Folgende Medien wurden ausgewählt: 20 Minuten, Watson und srf.ch.
+\subsection{Eingrenzung}
+Die Auswahl der zu untersuchenden online Medien basiert auf deren unterschiedlichen Platzierungen im Medienqualitätsrating (MQR)~\cite{MedienqualitaetsratingMQR24Verein}.
+Folgende Medien wurden ausgewählt: 20 Minuten, Watson und SRF News.
 Um dies herauszufinden wurden alle Artikel von den Medien in einem regelmässigen Zeitabstand herruntergeladen und in eine Datenbank gespeichert.
 Ist in der Datenbank ein Artikel bereits gespeichert, wird der der die Änderung seperat in der Datenbank gespeichert.
 Somit kann analysiert werden welche Artikel, von welchen Medien wie oft geändert wurden.
@@ -48,7 +48,7 @@ Somit kann analysiert werden welche Artikel, von welchen Medien wie oft geänder
 \section{Methodik}
 
 Für die Beantwortung der Fragestellung wurden mehrere Python Applikationen entwickelt.
-Diese sind alle in einem Github-Repository\footnote{https://github.com/dariohollbach/swiss-news-change-tracker} gespeichert. 
+Diese sind alle in einem Github-Repository\footnote{\url{https://github.com/dariohollbach/swiss-news-change-tracker}} versioniert. 
 
 \subsection{Web Crawling}
 
@@ -58,13 +58,24 @@ Die ausgewählten Medien verfügen alle über einen RSS-Feed.
 Um diesen auszulesen wurde das Python Modul \texttt{feedparser} verwendet.
 Von dem RSS Feed können die Links zu den Artikeln herausgefunden werden.
 Mit dem Python \texttt{request} Modul wurde der Inhalt der Artikel heruntergeladen.
-Da die Artikel aus dem Web stammen ist das Format HTML. 
+Da die Artikel aus dem Web stammen ist das Format HTML\@. 
 Für die Datenbank ist nur der Text eines Artikel von Relevanz.
 Dieser Text-Inhalt wurde mithilfe vom Python Modul \texttt{BeautifulSoup} extrahiert.
 
-Um die Applikation alle fünf Minuten auszuführen, wurde ein Cron-Job erstellt. 
+Um die Applikation in einem regelmässigem Intervall auszuführen, wurde ein Cron-Job erstellt. 
 Beim erstellen des Cron Jobs sind Probleme aufgetreten, welche schwierig nachzuvollziehen waren. 
 Deshalb wurde die Ausgabe der Python Applikation in ein Log-File \texttt{swiss\_news\_change\_tracker\_log} gespeichert.
+
+\subsection{Datenbank}
+
+Für die Speicherung der heruntergeladenen Artikel und deren Änderungen wurde eine SQLite-Datenbank verwendet.
+SQLite wurde gewählt, da es eine einfache und leichtgewichtige Lösung ist, welche keine zusätzliche Server-Infrastruktur benötigt.
+Die Datenbank besteht aus drei Tabellen: Eine Tabelle für die Zeitschrifen, eine Tabelle für die Artikel und eine Tabelle für die Änderungen.
+Da das Crawling auf dem Raspberry Pi durchgeführt wird, welches nur über begrenzte Ressourcen verfügt, wurde auf eine komplexere Datenbanklösung verzichtet.
+Durch die Eigenschaft, dass SQLite-Dateien als einzelne Dateien gespeichert werden, kann die Analyse der Datenbank auch auf anderen Systemen einfach durchgeführt werden.
+Die Tabelle für die Zeitschriften enthält den Namen der Zeitung.
+Die Tabelle für die Artikel enthält den Titel, den Inhalt, das Veröffentlichungsdatum und einen Fremdschlüssel zur Zeitschrift.
+Die Tabelle für die Änderungen enthält den die Differenz zum ursprünglichen Artikel, das Änderungsdatum und einen Fremdschlüssel zum Artikel.
 
 \subsection{Visualisierung der Änderungen}
 
@@ -85,17 +96,66 @@ Für die statistische Auswertung der klassifizierten Daten wurde ein Python-Skri
 Dieses ermöglichte es, die Daten zu aggregieren und zu analysieren, um die Forschungsfrage zu beantworten. 
 Zur Veranschaulichung der Resultate wurden mit \texttt{matplotlib} diverse Grafiken erstellt, welche die Verteilung und Art der Änderungen visualisieren.
 
-\begin{verbatim}
-*/2 * * * * cd /home/dario/swiss-news-change-tracker/ && python3 /home/dario/swiss-news-change-tracker/main.py > swiss_news_change_tracker_log
-\end{verbatim}
-
-
 \section{Resultate}
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
 
+In der Zeit vom 10. November 2025 bis zum 20. November 2025 wurden insgesammt 1767 Artikel von den drei ausgewählten Medien heruntergeladen.
+Davon wurden 381 Artikel mindestens einmal geändert.
+
+\begin{table*}[b]
+    \centering
+    \caption{Zusammenfassung der Artikel und Änderungen pro Medium}
+    \label{tab:change_summary}
+    \begin{tabular}{lrrrr}
+        \hline
+        \textbf{Zeitung} & \textbf{Total Artikel} & \textbf{Total Änderungen} & \textbf{Tippfehler} & \textbf{Inhaltliche Änd.} \\
+        \hline
+        20 Minuten & 624 & 148 & 88 & 60 \\
+        Watson & 601 & 96 & 51 & 45 \\
+        SRF News & 542 & 137 & 78 & 59 \\
+        \hline
+        \textbf{Total} & \textbf{1767} & \textbf{381} & \textbf{217} & \textbf{164} \\
+        \hline
+    \end{tabular}
+\end{table*}
+
+Tabelle \ref{tab:change_summary} fasst die gesammelten Daten zusammen. 
+Sie zeigt die Gesamtzahl der erfassten Artikel, die Gesamtzahl der Änderungen sowie die Aufschlüsselung dieser Änderungen in Tippfehler und inhaltliche Anpassungen für jedes untersuchte online Medium.
+Die Klassifikation in Tippfehler und inhaltliche Änderungen erfolgte manuell mittels der in der Web-Applikation implementierten Funktionalität.
+Deshalb ist die Unterscheidung nicht immer akkurat, jedoch gibt sie einen guten Überblick über die Art der vorgenommenen Änderungen.
+
+Abbildung \ref{fig:article_and_change_counts_by_newspaper} zeigt die Anzahl Änderungen pro Medium.
+Es ist ersichlich, dass im Durchschnitt ungefähr jeder fünfte Artikel geändert wurde.
+20 Minuten und SRF News weisen dabei eine ähnliche Änderungsrate auf, während Watson etwas weniger Änderungen aufweist.
+Dabei ist bei der Interpretation zu beachten, dass bei vielen Artikeln auch nur die positionierung von Inhalten geändert wurde, ohne dass der eigentliche Inhalt angepasst wurde.
+Dies wurde ebenfalls als Tippfehler klassifiziert.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{article_and_change_counts_by_newspaper.png}
+    \caption{Anzahl \"{A}nderungen pro Medium}
+    \label{fig:article_and_change_counts_by_newspaper}
+\end{figure}
+
+Zum Resultat der Arbeit gehört auch die Web-Applikation zur Visualisierung der Artikeländerungen.
+Denn die Analyse der reinen Zahlen gibt keinen Einblick in die Art der Änderungen.
+Abbildung \ref{fig:web_app_screenshot} zeigt einen Screenshot der Web-Applikation.
+Dort ist ersichtlich, dass der Artikel von 20 Minuten am 12.11.2025 um 14:30 Uhr geändert wurde.
+Durch das Klicken auf den Button "Änderungen anzeigen" werden die vorgenommenen Änderungen sichtbar.
+In diesem Fall wurde der Satz "Die Polizei hat die Ermittlungen aufgenommen." hinzugefügt.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{frontend.png}
+    \caption{Screenshot der Web-Applikation}
+    \label{fig:web_app_screenshot}
+\end{figure}
 
 \section{Diskussion}
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+Die durchgeführte Analyse zeigt, dass eine beträchtliche Anzahl von Artikeln in Schweizer online Medien nach ihrer Veröffentlichung geändert wird.
+Die Tatsache, dass etwa jeder fünfte Artikel Änderungen erfährt, unterstreicht die Dynamik und Flexibilität digitaler Nachrichtenformate.
+Die Unterscheidung zwischen Tippfehlern und inhaltlichen Änderungen ist dabei besonders relevant, da sie Aufschluss über die Art der vorgenommenen Anpassungen gibt.
+Während Tippfehlerkorrekturen oft auf redaktionelle Sorgfalt hinweisen, deuten inhaltliche Änderungen auf eine Reaktion auf neue Informationen oder Leserfeedback hin.
+Es ist jedoch wichtig zu beachten, dass die Klassifikation der Änderungen manuell erfolgte, was zu subjektiven Einschätzungen führen kann.
+Zukünftige Arbeiten könnten automatisierte Methoden zur Klassifikation von Änderungen entwickeln, um eine objektivere Analyse zu ermöglichen.
+Der Gesammelte Datensatz bietet zudem die Grundlage für weiterführende Untersuchungen, beispielsweise zur zeitlichen Verteilung von Änderungen oder zur Analyse spezifischer Themenbereiche, die häufiger angepasst werden.
 
 %-------------------------
 % literature

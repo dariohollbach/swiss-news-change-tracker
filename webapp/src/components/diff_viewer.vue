@@ -6,7 +6,7 @@
         <span class="added">+++ {{ header.newFile }}</span>
       </div>
       <div class="classification-control">
-        <label :for="'classification-select-' + changeId">Classify:</label>
+        <label :for="'classification-select-' + changeId">Klassifikation:</label>
         <select :id="'classification-select-' + changeId" v-model="currentClassification"
           @change="updateClassification">
           <option value="not classified">Not Classified</option>

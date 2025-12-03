@@ -13,6 +13,11 @@
 \usepackage[affil-it]{authblk} 
 \usepackage{newtxtext} 
 \usepackage{newtxmath}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{dblfloatfix}
+\usepackage{listings}
+\usepackage{microtype}
 \setkomafont{disposition}{\bfseries}
 
 %-------------------------
@@ -33,3 +38,10 @@
 }
 
 \bibliographystyle{apacite}
+
+% listings configuration
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single
+}
