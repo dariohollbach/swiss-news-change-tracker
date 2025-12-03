@@ -77,4 +77,17 @@ npm install
 npm run dev
 ```
 
-![alt text](images/frontend.png "Screenshot of the web application")
+![Screenshot of the web application](images/frontend.png "Screenshot of the web application")
+
+## Architecture
+
+The project is structured into the following main components:
+- `src/`: Contains the source code for the web crawler and database management.
+- `webapp/`: Contains the source code for the web application (Flask backend and Vue.js frontend).
+- `term-paper/`: Contains the documentation and term paper related to the project
+
+![Architecture](images/architecture.drawio.png "Architecture of the project")
+
+## Term Paper
+The term paper discusses the motivation, methodology, results, and conclusions of the project. It is written in LaTeX and can be compiled using a LaTeX editor or command line tools.
+The compiled PDF can be found in the `term-paper` directory as `documentation.pdf`.
