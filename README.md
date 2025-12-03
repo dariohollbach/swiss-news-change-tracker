@@ -44,6 +44,9 @@ python3 src/database_manager.py
 
 The database file `swiss_news_articles.db` will be created in the directory from where you call the application.
 
+![Screenshot of the web application](images/database_er_diagram.png "Screenshot of the web application")
+
+
 ## Web Crawler
 The web crawler is implemented in `main.py`. It scrapes articles from predefined news websites and stores them in the database.
 To run the crawler, execute:
