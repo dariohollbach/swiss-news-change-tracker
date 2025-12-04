@@ -19,6 +19,7 @@
 % ------------------------
 \input{packages_and_configuration}
 
+
 %-------------------------
 % document begin
 %-------------------------
@@ -28,6 +29,10 @@
 % title
 %-------------------------
 \input{title}
+\clearpage
+\pagestyle{plain} % Setzt den Seitenstil auf normale Seitenzahlen
+\setcounter{page}{1} % Setzt den Seitenzähler auf 1
+
 
 \twocolumn
 
@@ -37,23 +42,29 @@ Die Präsenz von online Medien wird ständig grösser.
 Gemäss dem Medienbarometer der Schweiz haben die online Medien in der Schweiz im Jahr 2023 eine Meinungsmacht von 27\% \cite{bakomMediengattungen}.
 Im Vergleich zu den Printmedien gibt es für online Medien die möglichkeit, Artikel auch nach der Veröffentlichung noch zu ändern.
 Wie häufig diese Möglichkeit von unterschiedlichen Schweizer online Zeitschriften genutzt wird, wird in dieser Arbeit untersucht.
+Um dies herauszufinden wurden alle Artikel von den Medien in einem regelmässigen Zeitabstand herruntergeladen und in eine Datenbank gespeichert.
+
 
 \subsection{Eingrenzung}
 Die Auswahl der zu untersuchenden online Medien basiert auf deren unterschiedlichen Platzierungen im Medienqualitätsrating (MQR)~\cite{MedienqualitaetsratingMQR24Verein}.
 Folgende Medien wurden ausgewählt: 20 Minuten, Watson und SRF News.
-Um dies herauszufinden wurden alle Artikel von den Medien in einem regelmässigen Zeitabstand herruntergeladen und in eine Datenbank gespeichert.
-Ist in der Datenbank ein Artikel bereits gespeichert, wird der der die Änderung seperat in der Datenbank gespeichert.
-Somit kann analysiert werden welche Artikel, von welchen Medien wie oft geändert wurden.
 
 \section{Methodik}
 
-Für die Beantwortung der Fragestellung wurden mehrere Python Applikationen entwickelt.
-Diese sind alle in einem Github-Repository\footnote{\url{https://github.com/dariohollbach/swiss-news-change-tracker}} versioniert. 
+Zur Beantwortung der Forschungsfrage wurden mehrere Python-Applikationen entwickelt. 
+Der zugehörige Quellcode ist in einem öffentlichen GitHub-Repository\footnote{\url{https://github.com/dariohollbach/swiss-news-change-tracker}} zugänglich.
 
-\subsection{Web Crawling}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{architecture.drawio.png}
+    \caption{Architektur}
+    \label{fig:architecture}
+\end{figure}
 
-Das regelmässige Herunterladen von Daten aus dem Internet wird Web-Crawling genannt.
-Für das Web-Crawling wurde eine Python Applikation entwicklet.
+\subsection{Web Scraping}
+
+Der Prozess der Datenextraktion von Webseiten wird als Web-Scraping bezeichnet und gewinnt zunehmend an Bedeutung, da immer mehr Informationen online verfügbar sind~\cite[S. V]{penmanWebScrapingPython2015}.
+Für das Web-Scraping wurde eine Python Applikation entwickelt.
 Die ausgewählten Medien verfügen alle über einen RSS-Feed.
 Um diesen auszulesen wurde das Python Modul \texttt{feedparser} verwendet.
 Von dem RSS Feed können die Links zu den Artikeln herausgefunden werden.
@@ -61,6 +72,12 @@ Mit dem Python \texttt{request} Modul wurde der Inhalt der Artikel heruntergelad
 Da die Artikel aus dem Web stammen ist das Format HTML\@. 
 Für die Datenbank ist nur der Text eines Artikel von Relevanz.
 Dieser Text-Inhalt wurde mithilfe vom Python Modul \texttt{BeautifulSoup} extrahiert.
+Beautiful Soup ist ein beliebtes Modul, das eine Webseite parst und eine komfortable Schnittstelle zur Navigation im Inhalt bereitstellt~\cite[S. 26]{penmanWebScrapingPython2015}.
+
+In Python wurde ein Interface für die Crawler der verschiedenen Medien definiert.
+Jeder Crawler implementiert dieses Interface und ist für das Herunterladen und Parsen der Artikel eines Mediums zuständig.
+Der Hauptteil der Applikation ruft die verschiedenen Crawler auf. 
+Dies ist in Abbildung \ref{fig:architecture} dargestellt.
 
 Um die Applikation in einem regelmässigem Intervall auszuführen, wurde ein Cron-Job erstellt. 
 Beim erstellen des Cron Jobs sind Probleme aufgetreten, welche schwierig nachzuvollziehen waren. 
@@ -71,30 +88,29 @@ Deshalb wurde die Ausgabe der Python Applikation in ein Log-File \texttt{swiss\_
 Für die Speicherung der heruntergeladenen Artikel und deren Änderungen wurde eine SQLite-Datenbank verwendet.
 SQLite wurde gewählt, da es eine einfache und leichtgewichtige Lösung ist, welche keine zusätzliche Server-Infrastruktur benötigt.
 Die Datenbank besteht aus drei Tabellen: Eine Tabelle für die Zeitschrifen, eine Tabelle für die Artikel und eine Tabelle für die Änderungen.
-Da das Crawling auf dem Raspberry Pi durchgeführt wird, welches nur über begrenzte Ressourcen verfügt, wurde auf eine komplexere Datenbanklösung verzichtet.
-Durch die Eigenschaft, dass SQLite-Dateien als einzelne Dateien gespeichert werden, kann die Analyse der Datenbank auch auf anderen Systemen einfach durchgeführt werden.
-Die Tabelle für die Zeitschriften enthält den Namen der Zeitung.
-Die Tabelle für die Artikel enthält den Titel, den Inhalt, das Veröffentlichungsdatum und einen Fremdschlüssel zur Zeitschrift.
-Die Tabelle für die Änderungen enthält den die Differenz zum ursprünglichen Artikel, das Änderungsdatum und einen Fremdschlüssel zum Artikel.
+Das zugehörige Entity-Relationship-Diagramm (ER-Diagramm) der Datenbank ist in Abbildung \ref{fig:database_er_diagram} im Anhang dargestellt.
+Wie in Abbildung \ref{fig:architecture} ersichtlich, erfolgt der Zugriff auf die Datenbank durch den Database-Manager mittels SQL-Abfragen.
 
 \subsection{Visualisierung der Änderungen}
 
 Da die reinen Daten der Artikeländerungen mittels SQL-Abfragen nur schwer zu interpretieren sind, wurde eine Web-Applikation zur Visualisierung entwickelt.
 Das Frontend wurde mit dem JavaScript-Framework \texttt{Vue.js} umgesetzt.
-Für den Datenzugriff wurde eine REST-API in Python entwickelt, welche dem Frontend die in der Datenbank gespeicherten Artikel und deren Änderungen zur Verfügung stellt.
-Diese API greift auf dieselbe Datenbankinfrastruktur zu wie der Web-Crawler.
+Für den Datenzugriff wurde eine Flask Server entwickelt, welche dem Frontend die in der Datenbank gespeicherten Artikel und deren Änderungen zur Verfügung stellt.
+Diese API greift auf dieselbe Datenbankinfrastruktur zu wie der Web-Scraper. 
+Dies ist in Abbildung \ref{fig:architecture} dargestellt.
 Die Web-Applikation stellt die Artikel der verschiedenen Medien übersichtlich dar. 
 Vorhandene Änderungen eines Artikels können durch eine interaktive Ausklapp-Funktion angezeigt werden, was eine direkte Analyse der Modifikationen ermöglicht.
 
-\subsection{Klassifikation der Änderungen}
+\subsubsection{Klassifikation der Änderungen}
 Eine erste Analyse der erfassten Daten zeigte, dass viele Änderungen lediglich Korrekturen von Rechtschreib- oder Tippfehlern umfassen. Um zwischen solch geringfügigen Anpassungen und substanziellen inhaltlichen Modifikationen zu differenzieren, wurde eine Klassifizierung der Änderungen vorgenommen.
 Aufgrund der überschaubaren Anzahl an Änderungen wurde dieser Prozess manuell durchgeführt.
-Zu diesem Zweck wurde die Web-Anwendung um eine Funktionalität erweitert, die es ermöglicht, jede Änderung mittels eines Schiebereglers als geringfügig oder inhaltlich zu klassifizieren.
+Hierfür wurde die Web-Anwendung so erweitert, dass jede Änderung über ein Dropdown-Menü als Tippfehler oder inhaltliche Anpassung klassifiziert werden kann.
 
 \subsection{Analyse der Daten}
-Für die statistische Auswertung der klassifizierten Daten wurde ein Python-Skript unter Verwendung der Bibliothek \texttt{Pandas} entwickelt. 
-Dieses ermöglichte es, die Daten zu aggregieren und zu analysieren, um die Forschungsfrage zu beantworten. 
-Zur Veranschaulichung der Resultate wurden mit \texttt{matplotlib} diverse Grafiken erstellt, welche die Verteilung und Art der Änderungen visualisieren.
+Für die statistische Auswertung der klassifizierten Daten wurde ein Python-Skript unter Verwendung der Bibliothek \texttt{Pandas} und \texttt{matplotlib} entwickelt. 
+Dieses ermöglichte es, die Daten zu aggregieren und zu analysieren, um die Forschungsfrage zu beantworten.
+Die Relevanz solcher Werkzeuge wird in der Fachliteratur betont: \enquote{Im heutigen datengesteuerten Zeitalter stehen Organisationen [...] vor der Herausforderung, aus den riesigen Datenmengen [...] aussagekräftige Informationen zu gewinnen. [...] Genau hier kommt Pandas ins Spiel.}~\cite[S. 1]{firdoseUltimatePandasData2024}.
+
 
 \section{Resultate}
 
@@ -119,28 +135,24 @@ Davon wurden 381 Artikel mindestens einmal geändert.
 \end{table*}
 
 Tabelle \ref{tab:change_summary} fasst die gesammelten Daten zusammen. 
-Sie zeigt die Gesamtzahl der erfassten Artikel, die Gesamtzahl der Änderungen sowie die Aufschlüsselung dieser Änderungen in Tippfehler und inhaltliche Anpassungen für jedes untersuchte online Medium.
-Die Klassifikation in Tippfehler und inhaltliche Änderungen erfolgte manuell mittels der in der Web-Applikation implementierten Funktionalität.
-Deshalb ist die Unterscheidung nicht immer akkurat, jedoch gibt sie einen guten Überblick über die Art der vorgenommenen Änderungen.
+Obwohl die manuelle Klassifikation eine gewisse Ungenauigkeit durch subjektive Einschätzungen mit sich bringt, bietet sie dennoch einen guten Überblick über die Art der vorgenommenen Änderungen.
 
-Abbildung \ref{fig:article_and_change_counts_by_newspaper} zeigt die Anzahl Änderungen pro Medium.
-Es ist ersichlich, dass im Durchschnitt ungefähr jeder fünfte Artikel geändert wurde.
-20 Minuten und SRF News weisen dabei eine ähnliche Änderungsrate auf, während Watson etwas weniger Änderungen aufweist.
-Dabei ist bei der Interpretation zu beachten, dass bei vielen Artikeln auch nur die positionierung von Inhalten geändert wurde, ohne dass der eigentliche Inhalt angepasst wurde.
-Dies wurde ebenfalls als Tippfehler klassifiziert.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{article_and_change_counts_by_newspaper.png}
     \caption{Anzahl \"{A}nderungen pro Medium}
     \label{fig:article_and_change_counts_by_newspaper}
 \end{figure}
+Abbildung \ref{fig:article_and_change_counts_by_newspaper} zeigt die Anzahl Änderungen pro Medium.
+Es ist ersichlich, dass im Durchschnitt ungefähr jeder fünfte Artikel geändert wurde.
+20 Minuten und SRF News weisen dabei eine ähnliche Änderungsrate auf, während Watson etwas weniger Änderungen aufweist.
+Dabei ist bei der Interpretation zu beachten, dass bei vielen Artikeln auch nur die positionierung von Inhalten geändert wurde, ohne dass der eigentliche Inhalt angepasst wurde.
+Dies wurde ebenfalls als Tippfehler klassifiziert.
+
 
 Zum Resultat der Arbeit gehört auch die Web-Applikation zur Visualisierung der Artikeländerungen.
 Denn die Analyse der reinen Zahlen gibt keinen Einblick in die Art der Änderungen.
 Abbildung \ref{fig:web_app_screenshot} zeigt einen Screenshot der Web-Applikation.
-Dort ist ersichtlich, dass der Artikel von 20 Minuten am 12.11.2025 um 14:30 Uhr geändert wurde.
-Durch das Klicken auf den Button "Änderungen anzeigen" werden die vorgenommenen Änderungen sichtbar.
-In diesem Fall wurde der Satz "Die Polizei hat die Ermittlungen aufgenommen." hinzugefügt.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{frontend.png}
@@ -150,11 +162,8 @@ In diesem Fall wurde der Satz "Die Polizei hat die Ermittlungen aufgenommen." hi
 
 \section{Diskussion}
 Die durchgeführte Analyse zeigt, dass eine beträchtliche Anzahl von Artikeln in Schweizer online Medien nach ihrer Veröffentlichung geändert wird.
-Die Tatsache, dass etwa jeder fünfte Artikel Änderungen erfährt, unterstreicht die Dynamik und Flexibilität digitaler Nachrichtenformate.
 Die Unterscheidung zwischen Tippfehlern und inhaltlichen Änderungen ist dabei besonders relevant, da sie Aufschluss über die Art der vorgenommenen Anpassungen gibt.
 Während Tippfehlerkorrekturen oft auf redaktionelle Sorgfalt hinweisen, deuten inhaltliche Änderungen auf eine Reaktion auf neue Informationen oder Leserfeedback hin.
-Es ist jedoch wichtig zu beachten, dass die Klassifikation der Änderungen manuell erfolgte, was zu subjektiven Einschätzungen führen kann.
-Zukünftige Arbeiten könnten automatisierte Methoden zur Klassifikation von Änderungen entwickeln, um eine objektivere Analyse zu ermöglichen.
 Der Gesammelte Datensatz bietet zudem die Grundlage für weiterführende Untersuchungen, beispielsweise zur zeitlichen Verteilung von Änderungen oder zur Analyse spezifischer Themenbereiche, die häufiger angepasst werden.
 
 %-------------------------
@@ -164,5 +173,16 @@ Der Gesammelte Datensatz bietet zudem die Grundlage für weiterführende Untersu
 \newpage
 
 \bibliography{library}
+
+\newpage
+
+\section{Anhang}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{database_er_diagram.png}
+    \caption{Datenbank ER Diagram}
+    \label{fig:database_er_diagram}
+\end{figure}
 
 \end{document}
