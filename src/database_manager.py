@@ -48,6 +48,7 @@ def create_database():
 
 # News Paper Management
 def add_news_paper(name: str) -> int:
+    """Adds a news paper to the database and returns its ID."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -61,6 +62,7 @@ def add_news_paper(name: str) -> int:
 
 
 def get_news_paper_id(name: str) -> Optional[int]:
+    """Retrieves the ID of a news paper by its name."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -75,6 +77,7 @@ def get_news_paper_id(name: str) -> Optional[int]:
 
 
 def get_all_news_papers() -> list[NewsPaper]:
+    """Retrieves all news papers from the database."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -88,6 +91,7 @@ def get_all_news_papers() -> list[NewsPaper]:
 
 # Article Management
 def add_article(news_paper_id: int, title: str, content: str, publication_date: str) -> int:
+    """Adds an article to the database and returns its ID."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -105,6 +109,7 @@ def add_article(news_paper_id: int, title: str, content: str, publication_date: 
 
 
 def get_article_by_title(title: str) -> Optional[article.Article]:
+    """Retrieves an article by its title."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -124,6 +129,7 @@ def get_article_by_title(title: str) -> Optional[article.Article]:
 
 
 def get_article_by_id(article_id: int) -> Optional[article.Article]:
+    """Retrieves an article by its ID."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -143,6 +149,7 @@ def get_article_by_id(article_id: int) -> Optional[article.Article]:
 
 
 def delete_article(article_id: int):
+    """Deletes an article by its ID."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -154,6 +161,7 @@ def delete_article(article_id: int):
 
 
 def get_all_articles_of_news_paper(news_paper_id: int, limit: Optional[int] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> list[article.Article]:
+    """Retrieves all articles of a specific news paper, with optional filtering by date range and limit."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -188,6 +196,7 @@ def get_all_articles_of_news_paper(news_paper_id: int, limit: Optional[int] = No
 
 # Article Change Management
 def add_article_change(article_id: int, change: str, change_timestamp: str) -> int:
+    """Adds a change record for an article and returns the change ID."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -205,6 +214,7 @@ def add_article_change(article_id: int, change: str, change_timestamp: str) -> i
 
 
 def get_article_changes(article_id: int) -> list[dict]:
+    """Retrieves all changes for a specific article."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -226,6 +236,7 @@ def get_article_changes(article_id: int) -> list[dict]:
 
 
 def update_change_classification(change_id: int, classification: str):
+    """Updates the classification of a specific article change."""
     db_connection = sqlite3.connect("swiss_news_articles.db")
     cursor = db_connection.cursor()
 
@@ -239,6 +250,7 @@ def update_change_classification(change_id: int, classification: str):
 
 
 if __name__ == "__main__":
+    """Utility to create or reset the database."""
     confirmation = input(
         "This will delete the existing database and create a new one. Enter Y to continue...")
     if confirmation.upper() == "Y":

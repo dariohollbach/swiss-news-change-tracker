@@ -1,4 +1,5 @@
 class NewsPaper:
+    """Represents a newspaper with a title and an optional ID."""
     def __init__(self, title, id=None):
         self.title = title
         self.id = id

@@ -3,6 +3,7 @@ import csv
 import os
 
 def export_articles_and_changes_to_csv(db_path, output_csv_path, start_date, end_date):
+    """Exports articles and their changes within a date range to a CSV file."""
     print(f"Connecting to database at '{db_path}'...")
     db_connection = sqlite3.connect(db_path)
     cursor = db_connection.cursor()

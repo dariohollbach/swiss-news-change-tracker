@@ -25,6 +25,7 @@ class watson_content_fetcher(content_fetcher):
         return "Watson"
 
     def get_text_content(self, url: str) -> str:
+        """Fetches and extracts the main text content from a given article URL."""
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
 

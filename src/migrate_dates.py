@@ -2,6 +2,7 @@ import sqlite3
 from email.utils import parsedate_to_datetime
 
 def migrate_publication_dates():
+    """Migrates the publication_date field of all articles to a standardized format."""
     db_path = "swiss_news_articles.db"
     print(f"Connecting to database at '{db_path}'...")
     db_connection = sqlite3.connect(db_path)

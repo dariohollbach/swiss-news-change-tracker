@@ -16,11 +16,13 @@ CORS(app)  # This will allow all origins
 
 @app.route('/api/data/news_papers')
 def get_news_papers():
+    """Fetches all news papers from the database."""
     papers = database_manager.get_all_news_papers()
     return jsonify([paper.to_dict() for paper in papers])
 
 @app.route('/api/data/news_papers/<int:news_paper_id>/articles')
 def get_articles_by_news_paper(news_paper_id: int):
+    """Fetches all articles for a specific news paper."""
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     articles = database_manager.get_all_articles_of_news_paper(news_paper_id, limit=1000, start_date=start_date, end_date=end_date)
@@ -28,16 +30,19 @@ def get_articles_by_news_paper(news_paper_id: int):
 
 @app.route('/api/data/articles/<int:article_id>/changes')
 def get_article_changes(article_id: int):
+    """Fetches all changes for a specific article."""
     changes = database_manager.get_article_changes(article_id)
     return jsonify(changes)
 
 @app.route('/api/data/articles/<int:article_id>', methods=['DELETE'])
 def delete_article(article_id: int):
+    """Deletes a specific article by its ID."""
     database_manager.delete_article(article_id)
     return jsonify({"success": True, "message": f"Article {article_id} deleted successfully."})
 
 @app.route('/api/data/changes/<int:change_id>/classify', methods=['PUT'])
 def classify_change(change_id: int):
+    """Classifies a specific article change."""
     data = request.get_json()
     classification = data.get('classification')
     if not classification or classification not in ['not classified', 'typo', 'content change']:

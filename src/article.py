@@ -1,4 +1,5 @@
 class Article:
+    """A class representing an article with title, content, and publication date."""
     def __init__(self, title, content, publication_date, id=None):
         self.title = title
         self.content = content

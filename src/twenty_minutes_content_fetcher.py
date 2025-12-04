@@ -23,6 +23,7 @@ class twenty_minutes_content_fetcher(content_fetcher):
         return "20 Minuten"
 
     def get_text_content(self, url: str) -> str:
+        """Fetches and extracts the main text content from a given article URL."""
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
 

@@ -1,6 +1,7 @@
 import sqlite3
 
 def add_classification_column():
+    """Adds a 'classification' column to the 'article_changes' table."""
     db_path = "swiss_news_articles.db"
     print(f"Connecting to database at '{db_path}'...")
     db_connection = sqlite3.connect(db_path)
