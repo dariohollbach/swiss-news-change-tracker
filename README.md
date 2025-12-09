@@ -4,7 +4,7 @@ Application to crawl articles from swiss online news platforms.
 
 ## Setup
 
-The project requires Python 3.8+ and Node.js 14+.
+The project requires Python 3.8+ and Node.js 14+ and SQLite 3+.
 
 1. Clone the repository:
 
